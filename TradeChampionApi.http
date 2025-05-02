@@ -1,0 +1,6 @@
+@TradeChampionApi_HostAddress = http://localhost:5260
+
+GET {{TradeChampionApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
