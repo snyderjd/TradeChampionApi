@@ -1,0 +1,23 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore.Metadata;
+
+namespace TradeChampionApi.Models;
+
+public class Account
+{
+    [Key]
+    public int Id { get; set; }
+
+    [Required]
+    [MaxLength(100)]
+    public required string Name { get; set; }
+
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal Balance { get; set; } = 0m;
+
+    public int ApplicationUserId { get; set; }
+
+    [Required]
+    public required ApplicationUser ApplicationUser { get; set; }
+}
