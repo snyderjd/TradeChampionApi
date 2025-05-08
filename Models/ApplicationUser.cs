@@ -24,6 +24,10 @@ public class ApplicationUser
 
     public ICollection<Account> Accounts { get; set; } = new List<Account>();
 
+    [Required]
+    public required DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+
     public string FullName() => $"{FirstName} {LastName}";
 
 }

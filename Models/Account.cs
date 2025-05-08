@@ -20,4 +20,8 @@ public class Account
 
     [Required]
     public required ApplicationUser ApplicationUser { get; set; }
+
+    [Required]
+    public required DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 }
