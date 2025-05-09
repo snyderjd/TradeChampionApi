@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore.Metadata;
+using TradeChampionApi.Interfaces;
 
 namespace TradeChampionApi.Models;
 
-public class Account
+public class Account : IHasTimestamps
 {
     [Key]
     public int Id { get; set; }

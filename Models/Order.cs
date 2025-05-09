@@ -2,10 +2,11 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore.Metadata;
 using TradeChampionApi.Enums;
+using TradeChampionApi.Interfaces;
 
 namespace TradeChampionApi.Models;
 
-public class Order
+public class Order : IHasTimestamps
 {
     [Key]
     public int Id { get; set; }

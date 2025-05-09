@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using TradeChampionApi.Interfaces;
 
 namespace TradeChampionApi.Models;
 
-public class Trade
+public class Trade : IHasTimestamps
 {
     [Key]
     public int Id { get; set; }
