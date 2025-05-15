@@ -1,26 +1,27 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore.Metadata;
 using TradeChampionApi.Interfaces;
 
 namespace TradeChampionApi.Models;
 
-public class Account : IHasTimestamps
+public class Position : IHasTimestamps
 {
     [Key]
     public int Id { get; set; }
 
+    public int AccountId { get; set; }
     [Required]
-    [MaxLength(100)]
-    public required string Name { get; set; }
+    public required Account Account { get; set; }
 
+    [Required]
+    public required string Ticker { get; set; }
+
+    [Required]
+    public required int Quantity { get; set; }
+
+    [Required]
     [Column(TypeName = "decimal(18,2)")]
-    public decimal Balance { get; set; } = 0m;
-
-    public int ApplicationUserId { get; set; }
-
-    [Required]
-    public required ApplicationUser ApplicationUser { get; set; }
+    public decimal AveragePrice { get; set; }
 
     [Required]
     public required DateTime CreatedAt { get; set; }

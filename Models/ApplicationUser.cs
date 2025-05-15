@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Principal;
+using TradeChampionApi.Interfaces;
 
 namespace TradeChampionApi.Models;
 
-public class ApplicationUser
+public class ApplicationUser : IHasTimestamps
 {
     [Key]
     public int Id { get; set; }
@@ -23,6 +24,10 @@ public class ApplicationUser
     public required string Email { get; set; } = "";
 
     public ICollection<Account> Accounts { get; set; } = new List<Account>();
+
+    [Required]
+    public required DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     public string FullName() => $"{FirstName} {LastName}";
 
