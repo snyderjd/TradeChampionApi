@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TradeChampionApi.Models;
+using TradeChampionApi.Data;
 
 namespace TradeChampionApi.Controllers;
 
@@ -18,16 +19,16 @@ public class ApplicationUsersController : ControllerBase
 
     // GET: /api/ApplicationUsers
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ApplicationUser>>> GetUsersAsync()
+    public async Task<ActionResult<IEnumerable<ApplicationUser>>> GetApplicationUsersAsync()
     {
-        return await _dbContext.Users.ToListAsync();
+        return await _dbContext.ApplicationUsers.ToListAsync();
     }
 
     // GET: api/ApplicationUsers/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<ApplicationUser>> GetUserByIdAsync(int id)
+    public async Task<ActionResult<ApplicationUser>> GetApplicationUserByIdAsync(int id)
     {
-        var user = await _dbContext.Users.FindAsync(id);
+        var user = await _dbContext.ApplicationUsers.FindAsync(id);
 
         if (user == null)
             return NotFound();
@@ -35,4 +36,13 @@ public class ApplicationUsersController : ControllerBase
         return user;
     }
 
+    // POST: api/ApplicationUsers
+    [HttpPost]
+    public async Task<ActionResult<ApplicationUser>> CreateApplicationUserAsync(ApplicationUser user)
+    {
+        _dbContext.ApplicationUsers.Add(user);
+        await _dbContext.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetApplicationUserByIdAsync), new { id = user.Id }, user);
+    }
 }
