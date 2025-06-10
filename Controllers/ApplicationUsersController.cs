@@ -25,7 +25,7 @@ public class ApplicationUsersController : ControllerBase
     }
 
     // GET: api/ApplicationUsers/5
-    [HttpGet("{id}")]
+    [HttpGet("{id}", Name = "GetApplicationUserByIdAsync")]
     public async Task<ActionResult<ApplicationUser>> GetApplicationUserByIdAsync(int id)
     {
         var user = await _dbContext.ApplicationUsers.FindAsync(id);
@@ -43,6 +43,35 @@ public class ApplicationUsersController : ControllerBase
         _dbContext.ApplicationUsers.Add(user);
         await _dbContext.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetApplicationUserByIdAsync), new { id = user.Id }, user);
+        return CreatedAtRoute("GetApplicationUserByIdAsync", new { id = user.Id }, user);
+    }
+
+    // PUT: api/ApplicationUsers/5
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateUserAsync(int id, ApplicationUser updatedUser)
+    {
+        if (id != updatedUser.Id)
+            return BadRequest();
+
+        _dbContext.Entry(updatedUser).State = EntityState.Modified;
+
+        try
+        {
+            await _dbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!await ApplicationUserExistsAsync(id))
+                return NotFound();
+            else
+                throw;
+        }
+
+        return NoContent();
+    }
+
+    private async Task<bool> ApplicationUserExistsAsync(int id)
+    {
+        return await _dbContext.ApplicationUsers.AnyAsync(e => e.Id == id);
     }
 }
