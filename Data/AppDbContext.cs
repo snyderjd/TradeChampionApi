@@ -72,6 +72,7 @@ public class AppDbContext: DbContext
             }
             else if (entry.State == EntityState.Modified)
             {
+                entry.Property(e => e.CreatedAt).IsModified = false; // Prevent modification of CreatedAt
                 entry.Entity.UpdatedAt = now;
             }
         }

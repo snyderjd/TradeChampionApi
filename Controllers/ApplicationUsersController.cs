@@ -48,7 +48,7 @@ public class ApplicationUsersController : ControllerBase
 
     // PUT: api/ApplicationUsers/5
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUserAsync(int id, ApplicationUser updatedUser)
+    public async Task<IActionResult> UpdateApplicationUserAsync(int id, ApplicationUser updatedUser)
     {
         if (id != updatedUser.Id)
             return BadRequest();
@@ -66,6 +66,20 @@ public class ApplicationUsersController : ControllerBase
             else
                 throw;
         }
+
+        return NoContent();
+    }
+
+    // DELETE: api/ApplicationUsers/5
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteApplicationUserAsync(int id)
+    {
+        var user = await _dbContext.ApplicationUsers.FindAsync(id);
+        if (user == null)
+            return NotFound();
+
+        _dbContext.ApplicationUsers.Remove(user);
+        await _dbContext.SaveChangesAsync();
 
         return NoContent();
     }
