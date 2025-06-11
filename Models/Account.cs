@@ -23,6 +23,6 @@ public class Account : IHasTimestamps
     public required ApplicationUser ApplicationUser { get; set; }
 
     [Required]
-    public required DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 }

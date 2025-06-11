@@ -34,6 +34,6 @@ public class Order : IHasTimestamps
     public OrderStatus Status { get; set; }
 
     [Required]
-    public required DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 }
