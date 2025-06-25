@@ -25,7 +25,7 @@ public class AccountsController : ControllerBase
     }
 
     // GET: /api/Accounts/5
-    [HttpGet("{id}", Name = "GetAccountsByIdAsync")]
+    [HttpGet("{id}", Name = "GetAccountByIdAsync")]
     public async Task<ActionResult<Account>> GetAccountByIdAsync(int id)
     {
         var account = await _dbContext.Accounts.FindAsync(id);
@@ -48,7 +48,7 @@ public class AccountsController : ControllerBase
 
     // PUT: api/Accounts/5
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateAccountAsync(int id, Account upatedAccount)
+    public async Task<IActionResult> UpdateAccountAsync(int id, Account updatedAccount)
     {
         if (id != updatedAccount.Id)
             return BadRequest();

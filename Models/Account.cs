@@ -17,10 +17,10 @@ public class Account : IHasTimestamps
     [Column(TypeName = "decimal(18,2)")]
     public decimal Balance { get; set; } = 0m;
 
-    public int ApplicationUserId { get; set; }
-
     [Required]
-    public required ApplicationUser ApplicationUser { get; set; }
+    public required int ApplicationUserId { get; set; }
+
+    public ApplicationUser? ApplicationUser { get; set; }
 
     [Required]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
