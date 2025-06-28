@@ -10,9 +10,11 @@ public class Order : IHasTimestamps
 {
     [Key]
     public int Id { get; set; }
-    public int AccountId { get; set; }
+
     [Required]
-    public required Account Account { get; set; }
+    public required int AccountId { get; set; }
+
+    public Account Account { get; set; }
 
     [Required]
     public required string Ticker { get; set; }
