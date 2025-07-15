@@ -14,7 +14,7 @@ public class Order : IHasTimestamps
     [Required]
     public required int AccountId { get; set; }
 
-    public Account Account { get; set; }
+    public Account? Account { get; set; }
 
     [Required]
     public required string Ticker { get; set; }
