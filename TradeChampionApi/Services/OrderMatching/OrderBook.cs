@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TradeChampionApi.Models;
+using TradeChampionApi.Enums;
 
 namespace TradeChampionApi.Services.OrderMatching;
 
@@ -24,12 +25,12 @@ public class OrderBook
 
     public void AddOrder(Order order)
     {
-        if (order.OrderType != "Limit")
+        if (order.OrderType != OrderType.Limit)
             throw new NotImplementedException("Only limit orders are supported right now.");
 
-        if (order.Side == "Buy")
+        if (order.Side == OrderSide.Buy)
             _buyOrders.Add(order);
-        else if (order.Side == "Sell")
+        else if (order.Side == OrderSide.Sell)
             _sellOrders.Add(order);
         else
             throw new ArgumentException("Order side must be Buy or Sell.");
@@ -68,15 +69,19 @@ public class OrderBook
     }
 
     public IReadOnlyCollection<Order> GetBuyOrders() => _buyOrders;
-    public IReadOnlyCollection<Order> SellOrders() => _sellOrders;
+    public IReadOnlyCollection<Order> GetSellOrders() => _sellOrders;
 }
 
 // Comparers for sorting orders
 
-public class BuyOrderComparer : ICompare<Order>
+public class BuyOrderComparer : IComparer<Order>
 {
-    public int Compare(Order x, Order y)
+    public int Compare(Order? x, Order? y)
     {
+        if (ReferenceEquals(x, y)) return 0;
+        if (x is null) return -1;
+        if (y is null) return 1;
+
         int priceComparison = y.Price.CompareTo(x.Price);
         return priceComparison != 0 ? priceComparison : x.CreatedAt.CompareTo(y.CreatedAt);
     }
@@ -84,8 +89,12 @@ public class BuyOrderComparer : ICompare<Order>
 
 public class SellOrderComparer : IComparer<Order>
 {
-    public int Compare(Order x, Order y)
+    public int Compare(Order? x, Order? y)
     {
+        if (ReferenceEquals(x, y)) return 0;
+        if (x is null) return -1;
+        if (y is null) return 1;
+
         int priceComparison = x.Price.CompareTo(y.Price);
         return priceComparison != 0 ? priceComparison : x.CreatedAt.CompareTo(y.CreatedAt);
     }
