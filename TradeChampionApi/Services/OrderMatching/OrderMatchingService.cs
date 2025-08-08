@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using TradeChampionApi.Models;
 using TradeChampionApi.Data;
+using TradeChampionApi.Models;
 using TradeChampionApi.Enums;
 
 namespace TradeChampionApi.Services.OrderMatchingService;
@@ -18,48 +19,33 @@ public class OrderMatchingService
         _dbContext = dbContext;
     }
 
-    public async Task RunMatchingAsync()
+    public async Task RunMatchingAsync(Dictionary<string, OrderBook> orderBooks, CancellationToken ct = default)
     {
-        // 1. Fetch all orders that are either Pending or Partially Filled
-        var openOrders = await _dbContext.Orders
-            .Where(o => o.Status == OrderStatus.Pending || o.Status == OrderStatus.PartiallyFilled)
-            .OrderBy(o => o.CreatedAt)
-            .ToListAsync();
+        using var transaction = await _dbContext.Database.BeginTransactionAsync(ct);
 
-        if (!openOrders.Any()) return;
-
-        // 2. Group by symbol and create OrderBooks
-        var orderBooks = new Dictionary<string, OrderBook>();
-
-        foreach (var order in openOrders)
+        try
         {
-            if (!orderBooks.TryGetValue(order.Ticker, out var book))
+            foreach (var book in orderBooks.Values)
             {
-                book = new OrderBook(order.Ticker);
-                orderBooks[order.Ticker] = book;
+                var matches = book.MatchOrders();
+
+                foreach(var (buy, sell, quantity, price) in matches)
+                {
+                    await CreateTradeAsync(buy, sell, quantity, price, ct);
+                }
             }
 
-            book.AddOrder(order);
+            await _dbContext.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
         }
-
-        // 3. Match orders and create trades
-        foreach (var kvp in orderBooks)
+        catch
         {
-            var ticker = kvp.Key;
-            var book = kvp.Value;
-
-            var matches = book.MatchOrders();
-
-            foreach (var (buy, sell, quantity, price) in matches)
-            {
-                await CreateTradeAsync(buy, sell, quantity, price);
-            }
+            await transaction.RollbackAsync(ct);
+            throw;
         }
-
-        await _dbContext.SaveChangesAsync();
     }
 
-    private async Task CreateTradeAsync(Order buyOrder, Order sellOrder, int quantity, decimal price)
+    public async Task CreateTradeAsync(Order buyOrder, Order sellOrder, int quantity, decimal price, CancellationToken ct)
     {
         var trade = new Trade
         {
@@ -73,44 +59,38 @@ public class OrderMatchingService
 
         _dbContext.Trades.Add(trade);
 
-        // Update order quantities and statuses
         buyOrder.Quantity -= quantity;
         sellOrder.Quantity -= quantity;
 
-        if (buyOrder.Quantity == 0)
-            buyOrder.Status = OrderStatus.Filled;
-        else
-            buyOrder.Status = OrderStatus.PartiallyFilled;
+        buyOrder.Status = buyOrder.Quantity == 0 ? OrderStatus.Filled : OrderStatus.PartiallyFilled;
+        sellOrder.Status = sellOrder.Quantity == 0 ? OrderStatus.Filled : OrderStatus.PartiallyFilled;
 
-        if (sellOrder.Quantity == 0)
-            sellOrder.Status = OrderStatus.Filled;
-        else
-            sellOrder.Status = OrderStatus.PartiallyFilled;
-
-        // Update or create positions
-        await UpdatePositionAsync(buyOrder.AccountId, buyOrder.Ticker, quantity);
-        await UpdatePositionAsync(sellOrder.AccountId, sellOrder.Ticker, -quantity);
+        await UpdatePositionAsync(buyOrder.AccountId, buyOrder.Ticker, quantity, price, ct);
+        await UpdatePositionAsync(sellOrder.AccountId, sellOrder.Ticker, -quantity, price, ct);
     }
 
-    private async Task UpdatePositionAsync(int accountId, string ticker, int quantityDelta)
+    public async Task UpdatePositionAsync(
+        int accountId, string ticker, int quantityDelta, decimal price, CancellationToken ct
+    )
     {
-        var position = await _dbContext.Positions.FirstOrDefaultAsync(p => p.AccountId == accountId && p.Ticker = ticker);
+        var position =
+            await _dbContext.Positions.FirstOrDefaultAsync(p => p.AccountId == accountId && p.Ticker == ticker, ct);
 
         if (position != null)
         {
             position.Quantity += quantityDelta;
+            position.AveragePrice = 
+                (position.AveragePrice * (position.Quantity - quantityDelta) + price * quantityDelta) / position.Quantity;
         }
         else
         {
-            position = new Position
+            _dbContext.Positions.Add(new Position
             {
                 AccountId = accountId,
                 Ticker = ticker,
-                Quantity = quantityDelta
-            };
-            
-            _dbContext.Positions.Add(position);
+                Quantity = quantityDelta,
+                AveragePrice = price
+            });
         }
     }
-
 }
