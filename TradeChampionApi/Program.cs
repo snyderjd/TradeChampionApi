@@ -18,6 +18,9 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddHostedService<OrderMatchingWorker>();
+builder.Services.AddScoped<OrderMatchingService>();
+
 var app = builder.Build();
 app.MapControllers();
 
