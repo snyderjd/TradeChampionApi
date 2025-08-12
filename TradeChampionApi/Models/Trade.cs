@@ -19,13 +19,15 @@ public class Trade : IHasTimestamps
     [Required]
     public required int Quantity { get; set; }
 
-    public int BuyOrderId { get; set; }
     [Required]
-    public required Order BuyOrder { get; set; }
+    public required int BuyOrderId { get; set; }
+
+    public Order? BuyOrder { get; set; }
     
-    public int SellOrderId { get; set; }
     [Required]
-    public required Order SellOrder { get; set; }
+    public required int SellOrderId { get; set; }
+
+    public Order? SellOrder { get; set; }
 
     [Required]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

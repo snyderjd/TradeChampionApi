@@ -7,8 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using TradeChampionApi.Data;
 using TradeChampionApi.Models;
 using TradeChampionApi.Enums;
+using TradeChampionApi.Services.OrderMatching;
 
-namespace TradeChampionApi.Services.OrderMatchingService;
+namespace TradeChampionApi.Services.OrderMatching;
 
 public class OrderMatchingService
 {

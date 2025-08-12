@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,7 +43,7 @@ public class OrderMatchingWorker : BackgroundService
                 await LoadOpenOrdersAsync(dbContext, stoppingToken);
                 OutputOrderBookStatus();
 
-                if (shouldRunMatching())
+                if (ShouldRunMatching())
                 {
                     _logger.LogInformation("Running order matching...");
                     await matchingService.RunMatchingAsync(_orderBooks, stoppingToken);
@@ -65,7 +66,7 @@ public class OrderMatchingWorker : BackgroundService
     private async Task LoadOpenOrdersAsync(AppDbContext dbContext, CancellationToken ct)
     {
         var openOrders = await dbContext.Orders
-            .Where(o => o.OrderStatus == OrderStatus.Pending || o.OrderStatus == OrderStatus.PartiallyFilled)
+            .Where(o => o.Status == OrderStatus.Pending || o.Status == OrderStatus.PartiallyFilled)
             .ToListAsync(ct);
 
         _orderBooks.Clear(); // rebuild fresh each cycle

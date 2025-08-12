@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using TradeChampionApi.Data;
 using System.Text.Json.Serialization;
+using TradeChampionApi.Data;
+using TradeChampionApi.Services.OrderMatching;
 
 var builder = WebApplication.CreateBuilder(args);
 
