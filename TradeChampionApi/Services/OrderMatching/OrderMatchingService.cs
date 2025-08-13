@@ -32,6 +32,7 @@ public class OrderMatchingService
 
                 foreach(var (buy, sell, quantity, price) in matches)
                 {
+                    Console.WriteLine($"Matched Orders: {quantity} shares of {buy.Ticker} at {price}");
                     await CreateTradeAsync(buy, sell, quantity, price, ct);
                 }
             }
@@ -79,9 +80,18 @@ public class OrderMatchingService
 
         if (position != null)
         {
+            // If the new quantity is zero, delete the position
+            if (position.Quantity + quantityDelta == 0)
+            {
+                _dbContext.Positions.Remove(position);
+                return;
+            }
+
+            // Update the position's average price and quantity
+            position.AveragePrice =
+                (position.AveragePrice * position.Quantity + price * quantityDelta) / (position.Quantity + quantityDelta);
+
             position.Quantity += quantityDelta;
-            position.AveragePrice = 
-                (position.AveragePrice * (position.Quantity - quantityDelta) + price * quantityDelta) / position.Quantity;
         }
         else
         {
