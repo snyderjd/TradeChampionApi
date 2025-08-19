@@ -61,6 +61,7 @@ public class OrderMatchingService
 
         _dbContext.Trades.Add(trade);
 
+        // Update the orders' quantities and statuses
         buyOrder.Quantity -= quantity;
         sellOrder.Quantity -= quantity;
 

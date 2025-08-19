@@ -52,12 +52,8 @@ public class OrderBook
 
                 matches.Add((buy, sell, matchedQuantity, tradePrice));
 
-                // Update order quantities
-                buy.Quantity -= matchedQuantity;
-                sell.Quantity -= matchedQuantity;
-
-                if (buy.Quantity == 0) _buyOrders.Remove(buy);
-                if (sell.Quantity == 0) _sellOrders.Remove(sell);
+                if (buy.Quantity - matchedQuantity == 0) _buyOrders.Remove(buy);
+                if (sell.Quantity - matchedQuantity == 0) _sellOrders.Remove(sell);
             }
             else
             {
