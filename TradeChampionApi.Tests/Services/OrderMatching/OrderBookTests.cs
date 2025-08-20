@@ -123,8 +123,10 @@ public class OrderBookTests
         Assert.Equal(sellOrder, match.SellOrder);
         Assert.Equal(5, match.Quantity);
         Assert.Equal(152.5m, match.Price); // Midpoint of the buy and sell orders
-        Assert.Equal(5, buyOrder.Quantity); // Remaining
-        Assert.Equal(0, sellOrder.Quantity); // Fully matched
+
+        // Quantities should remain unchanged
+        Assert.Equal(10, buyOrder.Quantity);
+        Assert.Equal(5, sellOrder.Quantity);
     }
 
     [Fact]

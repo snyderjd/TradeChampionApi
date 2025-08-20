@@ -22,28 +22,42 @@ public class OrderMatchingService
 
     public async Task RunMatchingAsync(Dictionary<string, OrderBook> orderBooks, CancellationToken ct = default)
     {
-        using var transaction = await _dbContext.Database.BeginTransactionAsync(ct);
+        var supportsTransactions = _dbContext.Database.IsRelational();
 
-        try
+        if (supportsTransactions)
         {
-            foreach (var book in orderBooks.Values)
+            using var transaction = await _dbContext.Database.BeginTransactionAsync(ct);
+
+            try
             {
-                var matches = book.MatchOrders();
-
-                foreach(var (buy, sell, quantity, price) in matches)
-                {
-                    Console.WriteLine($"Matched Orders: {quantity} shares of {buy.Ticker} at {price}");
-                    await CreateTradeAsync(buy, sell, quantity, price, ct);
-                }
+                await MatchAndCreateTrades(orderBooks, ct);
+                await _dbContext.SaveChangesAsync(ct);
+                await transaction.CommitAsync(ct);
             }
-
-            await _dbContext.SaveChangesAsync(ct);
-            await transaction.CommitAsync(ct);
+            catch
+            {
+                await transaction.RollbackAsync(ct);
+                throw;
+            }
         }
-        catch
+        else
         {
-            await transaction.RollbackAsync(ct);
-            throw;
+            await MatchAndCreateTrades(orderBooks, ct);
+            await _dbContext.SaveChangesAsync(ct);
+        }
+
+
+    }
+
+    private async Task MatchAndCreateTrades(Dictionary<string, OrderBook> orderBooks, CancellationToken ct)
+    {
+        foreach (var book in orderBooks.Values)
+        {
+            var matches = book.MatchOrders();
+            foreach (var (buy, sell, quantity, price) in matches)
+            {
+                await CreateTradeAsync(buy, sell, quantity, price, ct);
+            }
         }
     }
 
